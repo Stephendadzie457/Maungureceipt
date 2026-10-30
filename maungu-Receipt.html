@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maungu | Receipt Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange:#F85C05; --yellow:#FFC93C; --dark:#17110B;
+  --bg:#F6F5F2; --white:#fff; --muted:#77736E;
+  --line:#E9E5DF; --green:#17865B; --red:#C33D3D;
+}
+* {box-sizing:border-box}
+
+body {margin:0;background:var(--bg);color:var(--dark);font-family:'Plus Jakarta Sans',Inter,Arial,sans-serif}
+button,input,select,textarea {font:inherit}
+button {cursor:pointer}
+.app {display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}
+.sidebar {background:var(--dark);color:white;padding:26px 17px;display:flex;flex-direction:column;gap:28px}
+.brand {display:flex;align-items:center;gap:11px;padding:0 8px}
+.brand-mark {width:42px;height:42px;border-radius:13px;background:var(--orange);display:grid;place-items:center;overflow:hidden}
+.brand-mark img {width:100%;height:100%;object-fit:contain;display:block}
+.brand h2 {font-size:17px;margin:0;letter-spacing:-.5px}
+.brand small {display:block;color:#B8B3AC;font-size:10px;margin-top:5px;letter-spacing:1.5px}
+.nav-label {color:#89847E;font-size:10px;letter-spacing:1.6px;padding:0 12px;margin-bottom:8px}
+.nav {display:grid;gap:6px}
+.nav button {border:0;background:transparent;color:#C9C4BD;text-align:left;padding:13px 14px;border-radius:10px;display:flex;align-items:center;gap:12px;font-size:13px}
+.nav button.active,.nav button:hover {background:#30271F;color:white}
+.nav button.active {box-shadow:inset 3px 0 var(--orange)}
+.nav-icon {width:20px;height:20px;flex-shrink:0}
+.nav-icon svg {width:100%;height:100%;display:block}
+.side-bottom {margin-top:auto;border-top:1px solid #3A332D;padding:17px 8px 0;color:#B8B3AC;font-size:11px;line-height:1.7}
+.side-bottom strong {color:white;display:block;font-size:12px}
+.main {min-width:0}
+.topbar {height:78px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 34px;gap:12px}
+.topbar small {color:var(--muted);font-size:11px}
+.topbar h3 {margin:4px 0 0;font-size:17px}
+.user {display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700}
+.avatar {width:36px;height:36px;border-radius:50%;background:#FFE3D2;color:var(--orange);display:grid;place-items:center}
+.content {padding:30px 34px;max-width:1450px;margin:auto}
+.page-head {display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:24px}
+.page-head h1 {font-size:25px;letter-spacing:-.8px;margin:0}
+.page-head p {font-size:13px;color:var(--muted);margin:7px 0 0}
+.btn {border:1px solid var(--line);border-radius:9px;padding:11px 15px;background:white;color:var(--dark);font-size:12px;font-weight:700}
+.btn-primary {background:var(--orange);border-color:var(--orange);color:white}
+.btn-dark {background:var(--dark);border-color:var(--dark);color:white}
+.btn:hover {filter:brightness(.96)}
+.stats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:23px}
+.stat,.panel {background:white;border:1px solid var(--line);border-radius:13px}
+.stat {padding:20px}
+.stat-top {display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
+.stat-icon {background:#FFF0E5;border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon svg {width:16px;height:16px;display:block}
+.stat-value {font-size:25px;font-weight:800;letter-spacing:-.8px;margin-top:18px;overflow-wrap:anywhere}
+.stat-note {font-size:11px;color:var(--muted);margin-top:7px}
+.panel {padding:22px;margin-bottom:20px;min-width:0}
+.panel-head {display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}
+.panel-head h2 {font-size:15px;margin:0}
+.panel-head p {font-size:11px;color:var(--muted);margin:6px 0 0}
+.link-btn {border:0;background:none;color:var(--orange);font-weight:700;font-size:12px}
+table {border-collapse:collapse;width:100%;font-size:12px}
+th {font-size:10px;letter-spacing:.6px;color:var(--muted);text-transform:uppercase;text-align:left;background:#FAF9F7}
+th,td {padding:14px 12px;border-bottom:1px solid #F0EDE8;white-space:nowrap}
+tbody tr:last-child td {border-bottom:0}
+.table-wrap {overflow-x:auto}
+.customer {font-weight:700}
+.subtext {font-size:10px;color:var(--muted);margin-top:5px}
+.pill {display:inline-block;padding:6px 9px;border-radius:20px;font-size:10px;font-weight:700;background:#F0EEEA}
+.paid {background:#E2F5EC;color:#13734D}
+.partial {background:#FFF2D5;color:#986500}
+.unpaid {background:#FBE8E7;color:#AE3232}
+.empty {padding:35px 12px;text-align:center;color:var(--muted);font-size:13px}
+.empty strong {display:block;color:var(--dark);font-size:14px;margin-bottom:8px}
+.form-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field {display:flex;flex-direction:column;gap:7px;min-width:0}
+.field label {font-size:11px;font-weight:700;color:#514B44}
+.field input,.field select,.field textarea,.search {width:100%;min-width:0;border:1px solid #DED9D1;border-radius:8px;padding:11px 12px;background:white;color:var(--dark);outline:none;font-size:12px}
+.field input:focus,.field select:focus,.field textarea:focus,.search:focus {border-color:var(--orange);box-shadow:0 0 0 3px #F85C051A}
+.field textarea {resize:vertical;min-height:75px}
+.full {grid-column:1/-1}
+.section-title {font-size:13px;font-weight:800;margin:24px 0 15px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.item-row {display:grid;grid-template-columns:minmax(130px,2fr) 120px 75px 105px 105px 35px;gap:8px;align-items:center;margin-bottom:10px}
+.item-row input {width:100%;min-width:0;border:1px solid #DED9D1;border-radius:7px;padding:10px 8px;font-size:12px}
+.item-row .item-color {width:100%;min-width:0;border:1px solid #DED9D1;border-radius:7px;padding:9px 4px 9px 24px;font-size:11px;font-weight:600;background:white;color:#17110B;outline:none}
+.item-row .item-color option {color:#17110B;background:#fff;font-weight:500}
+.color-wrap {position:relative;min-width:0}
+.color-wrap .swatch {position:absolute;left:7px;top:50%;transform:translateY(-50%);width:11px;height:11px;border-radius:50%;border:1px solid #0003;pointer-events:none}
+.swatch-dot {display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid #0003;vertical-align:-1px;margin-right:6px}
+.item-row .line-total {font-size:12px;font-weight:700;text-align:right}
+.item-name {color:var(--dark);font-weight:700}
+.item-name::placeholder {color:#17110B55}
+.receipt-item {font-weight:700;color:var(--dark)}
+.pay-choices {display:flex;gap:10px;flex-wrap:wrap}
+.pay-choice {position:relative;flex:1;min-width:110px}
+.pay-choice input {position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.pay-choice span {display:block;text-align:center;padding:11px 12px;border:1.5px solid #DED9D1;border-radius:9px;font-size:12px;font-weight:800;background:white;color:#514B44;transition:all .15s}
+.pay-choice input:checked + span.c-paid {background:#E2F5EC;border-color:#13734D;color:#13734D}
+.pay-choice input:checked + span.c-partial {background:#FFF2D5;border-color:#986500;color:#986500}
+.pay-choice input:checked + span.c-unpaid {background:#FBE8E7;border-color:#AE3232;color:#AE3232}
+.pay-choice input:focus-visible + span {box-shadow:0 0 0 3px #F85C051A}
+.remove {border:0;background:#FBE8E7;color:var(--red);border-radius:7px;height:34px}
+.items-head {display:grid;grid-template-columns:minmax(130px,2fr) 120px 75px 105px 105px 35px;gap:8px;color:var(--muted);font-size:10px;margin-bottom:10px}
+.items-head span:nth-child(5) {text-align:right}
+.add-line {border:1px dashed #D6CFC6;background:#FCFBF9;border-radius:8px;padding:11px;width:100%;color:#6C655C;font-size:12px;font-weight:700}
+.totals {margin:22px 0 0 auto;max-width:330px;display:grid;gap:12px}
+.total-line {display:flex;justify-content:space-between;gap:12px;font-size:12px}
+.total-line strong {font-size:13px}
+.total-line.grand {border-top:1px solid var(--line);padding-top:14px;font-size:15px;font-weight:800}
+.total-line.grand strong {font-size:22px;color:var(--orange)}
+.form-actions {display:flex;justify-content:flex-end;gap:10px;margin-top:25px}
+.filters {display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.filters .search {flex:1;min-width:180px;max-width:400px}
+.filters select {border:1px solid var(--line);background:white;border-radius:8px;padding:10px;font-size:12px}
+.report-grid {display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.bar-list {display:grid;gap:16px}
+.bar-label {display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px}
+.bar {height:8px;background:#F0EDE8;border-radius:20px;overflow:hidden}
+.bar-fill {height:100%;background:var(--orange);border-radius:20px}
+.toast {position:fixed;right:20px;bottom:20px;background:var(--dark);color:white;padding:14px 18px;border-radius:10px;font-size:12px;box-shadow:0 8px 30px #0002;z-index:20;max-width:90vw}
+.hidden {display:none!important}
+footer {text-align:center;font-size:10px;color:#8A847D;padding:15px}
+@media(max-width:1000px) {
+ .stats {grid-template-columns:repeat(2,minmax(0,1fr))}
+ .content {padding:24px 20px}
+ .topbar {padding:0 20px}
+}
+@media(max-width:650px) {
+ .app {grid-template-columns:1fr}
+ .sidebar {padding:12px;gap:12px}
+ .brand {padding:4px 6px}
+ .brand-mark {width:36px;height:36px}
+ .nav-label,.side-bottom {display:none}
+ .nav {display:flex;overflow-x:auto;gap:5px}
+ .nav button {flex-shrink:0;padding:10px;border-radius:8px;font-size:11px;gap:6px}
+ .nav-icon {width:auto}
+ .topbar {height:62px;padding:0 15px}
+ .content {padding:20px 13px}
+ .page-head h1 {font-size:22px}
+ .stats {gap:9px}
+ .stat {padding:14px}
+ .stat-value {font-size:21px;margin-top:14px}
+ .stat-note {font-size:10px}
+ .panel {padding:15px}
+ .form-grid {grid-template-columns:1fr}
+ .full {grid-column:auto}
+ .item-row {grid-template-columns:minmax(90px,1fr) 88px 52px 70px 62px 28px;gap:4px}
+ .item-row .item-color {padding:9px 2px 9px 20px;font-size:10px}
+ .color-wrap .swatch {left:5px}
+ .item-row input {padding:9px 5px;font-size:11px}
+ .items-head {grid-template-columns:minmax(90px,1fr) 88px 52px 70px 62px 28px;gap:4px;font-size:9px}
+ .item-row .line-total {font-size:10px}
+ .report-grid {grid-template-columns:1fr}
+ .form-actions {flex-wrap:wrap}
+ .form-actions button {flex:1}
+}
+@page {margin:0}
+@media print {
+ body {background:white}
+ .sidebar,.topbar,.no-print,footer {display:none!important}
+ .app {display:block}
+ .content {padding:0;max-width:none}
+ body.printing * {visibility:hidden}
+ body.printing #printReceipt,body.printing #printReceipt * {visibility:visible}
+ body.printing #printReceipt {position:absolute;left:0;top:0;width:100%;max-width:none;box-sizing:border-box;border:0;padding:16mm 14mm;margin:0}
+ body.printing .print-only {display:block!important}
+}
+.print-only {display:none}
+.trend-tabs {display:flex;gap:6px}
+.trend-tabs button {border:1px solid var(--line);background:white;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;color:#514B44;cursor:pointer}
+.trend-tabs button.on {background:var(--dark);border-color:var(--dark);color:white}
+.trend-box {position:relative}
+.trend-svg {width:100%;height:auto;display:block;overflow:visible}
+.trend-tip {position:absolute;pointer-events:none;background:var(--dark);color:white;font-size:11px;padding:7px 10px;border-radius:8px;transform:translate(-50%,-120%);white-space:nowrap;opacity:0;transition:opacity .1s}
+.trend-sum {display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.trend-sum strong {color:var(--dark)}
+.trend-up {color:#13734D!important}.trend-down {color:#AE3232!important}
+
+.receipt-paper {-webkit-print-color-adjust:exact;print-color-adjust:exact;max-width:700px;margin:0 auto;padding:28px;background:white;border:1px solid var(--line);color:#17110B}
+.receipt-brand {display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--dark);padding-bottom:20px}
+.receipt-brand .brand-mark {flex-shrink:0;overflow:hidden}
+.receipt-brand .brand-mark img {width:100%;height:100%;object-fit:contain;display:block}
+.receipt-brand h2 {margin:0;font-size:21px}
+.receipt-brand p {margin:6px 0 0;color:#777;font-size:11px}
+.receipt-meta {display:flex;justify-content:space-between;gap:15px;margin:22px 0;font-size:12px}
+.receipt-paper table th,.receipt-paper table td {padding:10px 6px}
+.receipt-total {margin:20px 0 0 auto;max-width:270px;display:grid;gap:10px}
+.receipt-thanks {border-top:1px solid #ddd;margin-top:25px;padding-top:16px;text-align:center;font-size:12px}
+
+
+
+/* ── Login page ── */
+.login-wrap {min-height:100vh;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:32px 24px;margin:0;position:relative;overflow:hidden}
+.login-wrap::before{content:"";position:absolute;inset:-10% -10% -10% -10%;background:radial-gradient(circle at 20% 30%,rgba(248,92,5,.08),transparent 45%),radial-gradient(circle at 80% 70%,rgba(23,17,11,.06),transparent 45%);z-index:0}
+.login-card {position:relative;z-index:1;background:var(--white);border:1px solid var(--line);border-radius:24px;width:100%;max-width:400px;padding:44px 32px;box-shadow:0 24px 48px rgba(0,0,0,.08),0 0 0 1px rgba(248,92,5,.06)}
+.login-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),#FFC93C);border-radius:24px 24px 0 0}
+.login-brand {text-align:center;margin-bottom:34px}
+.login-brand .mark {width:56px;height:56px;border-radius:16px;background:var(--orange);display:inline-grid;place-items:center;overflow:hidden;margin:0 auto 18px;box-shadow:0 8px 20px rgba(248,92,5,.35)}
+.login-brand .mark img {width:100%;height:100%;object-fit:contain;display:block}
+.login-brand h2 {margin:0 0 8px;font-size:26px;font-weight:800;letter-spacing:-.4px;color:var(--dark)}
+.login-brand p {margin:0;font-size:14px;color:var(--muted);line-height:1.6;font-weight:500}
+.login-form {color:var(--dark)}
+.login-form h1 {margin:0 0 10px;font-size:26px;font-weight:800;letter-spacing:-.4px;color:var(--dark)}
+.login-form p {margin:0 0 30px;font-size:15px;color:var(--muted);font-weight:500}
+.login-field {display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+.login-field label {font-size:11px;font-weight:800;letter-spacing:.7px;color:var(--dark);text-transform:uppercase;opacity:.8}
+.login-input-wrap {position:relative}
+.login-input {width:100%;border:1px solid var(--line);border-radius:12px;padding:15px 16px 15px 50px;background:#FAF9F6;color:var(--dark);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.login-input::placeholder {color:#B8B3AC}
+.login-input:focus {border-color:var(--orange);background:var(--white);box-shadow:0 0 0 4px rgba(248,92,5,.12)}
+.login-input-icon {position:absolute;left:16px;top:50%;transform:translateY(-50%);width:18px;height:18px;display:grid;place-items:center;color:#A6A097;pointer-events:none;font-size:16px}
+.login-btn {width:100%;border:0;border-radius:12px;background:linear-gradient(135deg,var(--orange),#e65600);color:var(--white);font-size:15px;font-weight:800;letter-spacing:.2px;padding:15px;box-shadow:0 10px 24px rgba(248,92,5,.3);transition:transform .15s,box-shadow .15s,filter .15s;cursor:pointer}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(248,92,5,.38)}
+.login-btn:active{transform:translateY(0);filter:brightness(.95)}
+.login-divider {display:flex;align-items:center;gap:12px;margin:26px 0;font-size:10.5px;color:#A6A097;text-transform:uppercase;letter-spacing:.8px}
+.login-divider::before,.login-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.login-footer {margin-top:30px;font-size:11px;color:#8A847D;text-align:center;letter-spacing:.5px;text-transform:uppercase}
+@media (max-width:640px){.login-card{max-width:100%;border-radius:0;padding:32px 24px}.login-wrap{padding:0 16px;min-height:auto}}
+</style>
+</head>
+<body>
+<section id="loginPage" class="hidden">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="mark"><img src="assets/logo-mark-clean.png" alt="MAUNGU logo" style="width:100%;height:100%;object-fit:contain;display:block"></div>
+        <h2>MAUNGU</h2>
+        <p>Maungu's Couture and Trade · Men's Fashion · Ghana</p>
+      </div>
+      <form id="loginForm" class="login-form" novalidate>
+        <h1>Welcome back</h1>
+        <p>Sign in to manage your receipts and sales.</p>
+        <div class="login-field">
+          <label for="loginEmail">Your email</label>
+          <div class="login-input-wrap"><span class="login-input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></span><input type="email" id="loginEmail" required placeholder="Enter your email" autocomplete="email" class="login-input"></div>
+        </div>
+        <div class="login-field">
+          <label for="loginPassword">Password</label>
+          <div class="login-input-wrap"><span class="login-input-icon">🔒</span><input type="password" id="loginPassword" required placeholder="Enter your password" autocomplete="current-password" class="login-input"></div>
+        </div>
+        <button type="submit" class="login-btn">SIGN IN</button>
+        <div class="login-divider">Or continue</div>
+      </form>
+      <div class="login-footer">MAUNGU'S COUTURE AND TRADE · RECEIPT MANAGER</div>
+    </div>
+    </div>
+  </div>
+</section>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><img src="assets/logo-mark-clean.png" alt="MAUNGU logo"></div>
+      <div><h2>MAUNGU</h2><small>RECEIPT MANAGER</small></div>
+    </div>
+    <div>
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="nav">
+        <button class="active" data-page="dashboard"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>Dashboard</button>
+        <button data-page="new"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>New receipt</button>
+        <button data-page="history"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>Transactions</button>
+        <button data-page="reports"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Reports</button>
+      </nav>
+    </div>
+    <div class="side-bottom"><strong>Maungu's Couture and Trade</strong>Men's fashion · Ghana<br>Currency: GHS (GH₵)</div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><small>MAUNGU / <span id="crumb">OVERVIEW</span></small><h3 id="topTitle">Business overview</h3></div>
+      <div class="user"><div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span id="userLabel">Business workspace</span><button class="btn" id="signOutBtn" style="padding:6px 10px;font-size:11px;margin-left:10px">Sign out</button></div>
+    </header>
+    <div class="content">
+      <section id="dashboardPage">
+        <div class="page-head"><div><h1>Good business starts here.</h1><p>Track receipts, payments and sales in one place.</p></div><button class="btn btn-primary" onclick="showPage('new')">＋ Create receipt</button></div>
+        <div class="stats">
+          <div class="stat"><div class="stat-top">Total sales <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 13l5 5M17 13l-5 5M17 13V3"/></svg></span></div><div class="stat-value" id="statSales">GH₵0.00</div><div class="stat-note">Value of saved receipts</div></div>
+          <div class="stat"><div class="stat-top">Collected <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></div><div class="stat-value" id="statPaid">GH₵0.00</div><div class="stat-note">Payments recorded</div></div>
+          <div class="stat"><div class="stat-top">Outstanding <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span></div><div class="stat-value" id="statBalance">GH₵0.00</div><div class="stat-note">Remaining customer balances</div></div>
+          <div class="stat"><div class="stat-top">Receipts <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span></div><div class="stat-value" id="statCount">0</div><div class="stat-note">Saved transactions</div></div>
+        </div>
+        <div class="panel"><div class="panel-head"><div><h2>Sales growth</h2><p>How your sales rise and fall over time</p></div><div class="trend-tabs" data-chart="trendDash"><button data-mode="day" class="on">Daily</button><button data-mode="week">Weekly</button><button data-mode="month">Monthly</button></div></div><div class="trend-box" id="trendDash"></div><div class="trend-sum" id="trendDashSum"></div></div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Recent transactions</h2><p>Your latest saved receipts</p></div><button class="link-btn" onclick="showPage('history')">View all →</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Receipt / Customer</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th><th></th></tr></thead><tbody id="recentRows"></tbody></table></div>
+          <div id="recentEmpty" class="empty"><strong>No transactions yet</strong>Create your first receipt to see your business activity here.</div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Quick actions</h2><p>Keep your daily work moving.</p></div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="showPage('new')">＋ New customer receipt</button><button class="btn" onclick="showPage('history')">Search transactions</button><button class="btn" onclick="exportCSV()">Export CSV backup</button></div>
+        </div>
+      </section>
+
+      <section id="newPage" class="hidden">
+        <div class="page-head"><div><h1>Create a receipt</h1><p>Enter the sale details. Totals update automatically.</p></div><button class="btn" onclick="showPage('history')">Transaction history</button></div>
+        <form id="saleForm" class="panel">
+          <div class="section-title" style="margin-top:0">01 / Customer information</div>
+          <div class="form-grid">
+            <div class="field"><label for="customerName">CUSTOMER NAME *</label><input id="customerName" required placeholder="e.g. Kwame Mensah"></div>
+            <div class="field"><label for="customerPhone">PHONE NUMBER</label><input id="customerPhone" placeholder="e.g. 024 000 0000"></div>
+            <div class="field full"><label for="customerAddress">DELIVERY ADDRESS (OPTIONAL)</label><input id="customerAddress" placeholder="Town, area or delivery address"></div>
+          </div>
+          <div class="section-title">02 / Items purchased</div>
+          <div class="items-head"><span>ITEM / DESCRIPTION</span><span>COLOUR</span><span>QTY</span><span>UNIT PRICE</span><span>AMOUNT</span><span></span></div>
+          <div id="items"></div>
+          <button class="add-line" type="button" onclick="addItem()">＋ Add another item</button>
+          <div class="section-title">03 / Payment and delivery</div>
+          <div class="form-grid">
+            <div class="field"><label for="delivery">DELIVERY FEE (GH₵)</label><input type="number" id="delivery" min="0" step=".01" value="0"></div>
+            <div class="field"><label for="discount">DISCOUNT (GH₵)</label><input type="number" id="discount" min="0" step=".01" value="0"></div>
+            <div class="field"><label for="amountPaid">AMOUNT RECEIVED (GH₵)</label><input type="number" id="amountPaid" min="0" step=".01" value="0"></div>
+            <div class="field"><label for="paymentMethod">PAYMENT METHOD</label><select id="paymentMethod"><option>Mobile Money</option><option>Cash</option><option>Cash on Delivery</option><option>Bank Transfer</option><option>Other</option></select></div>
+            <div class="field full"><label>PAYMENT STATUS * (click to choose)</label>
+              <div class="pay-choices" id="payChoices">
+                <label class="pay-choice"><input type="radio" name="payStatus" value="Paid" required><span class="c-paid">Paid</span></label>
+                <label class="pay-choice"><input type="radio" name="payStatus" value="Partially Paid"><span class="c-partial">Partially Paid</span></label>
+                <label class="pay-choice"><input type="radio" name="payStatus" value="Unpaid"><span class="c-unpaid">Unpaid</span></label>
+              </div>
+            </div>
+
+            <div class="field full"><label for="notes">NOTES (OPTIONAL)</label><textarea id="notes" placeholder="Extra details about the order"></textarea></div>
+          </div>
+          <div class="totals">
+            <div class="total-line"><span>Items subtotal</span><strong id="subtotalView">GH₵0.00</strong></div>
+            <div class="total-line"><span>Delivery</span><strong id="deliveryView">GH₵0.00</strong></div>
+            <div class="total-line"><span>Discount</span><strong id="discountView">− GH₵0.00</strong></div>
+            <div class="total-line grand"><span>Total due</span><strong id="totalView">GH₵0.00</strong></div>
+            <div class="total-line"><span>Balance remaining</span><strong id="balanceView">GH₵0.00</strong></div>
+          </div>
+          <div class="form-actions"><button type="button" class="btn" onclick="resetForm()">Clear form</button><button type="submit" class="btn btn-primary">Save receipt →</button></div>
+        </form>
+      </section>
+
+      <section id="historyPage" class="hidden">
+        <div class="page-head"><div><h1>Transactions</h1><p>Find receipts and review recorded payments.</p></div><button class="btn btn-primary" onclick="showPage('new')">＋ New receipt</button></div>
+        <div class="panel">
+          <div class="filters"><input id="searchInput" class="search" placeholder="Search receipt, customer or phone…"><select id="statusFilter"><option value="">All payment statuses</option><option>Paid</option><option>Partially Paid</option><option>Unpaid</option></select><button class="btn" onclick="exportCSV()">Export CSV ↓</button><button class="btn" onclick="exportJSON()">Backup JSON ↓</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Receipt / Customer</th><th>Date</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead><tbody id="historyRows"></tbody></table></div>
+          <div id="historyEmpty" class="empty"><strong>No matching receipts</strong>Your saved transactions will appear here.</div>
+        </div>
+      </section>
+
+      <section id="reportsPage" class="hidden">
+        <div class="page-head"><div><h1>Sales reports</h1><p>A quick summary of your saved receipt records.</p></div><button class="btn" onclick="exportCSV()">Export report ↓</button></div>
+
+        <div class="stats">
+          <div class="stat"><div class="stat-top">Recorded sales</div><div class="stat-value" id="reportSales">GH₵0.00</div><div class="stat-note">Total value of receipts</div></div>
+          <div class="stat"><div class="stat-top">Collected</div><div class="stat-value" id="reportPaid">GH₵0.00</div><div class="stat-note">Amount received</div></div>
+          <div class="stat"><div class="stat-top">Balances due</div><div class="stat-value" id="reportBalance">GH₵0.00</div><div class="stat-note">Still outstanding</div></div>
+          <div class="stat"><div class="stat-top">Average receipt</div><div class="stat-value" id="reportAverage">GH₵0.00</div><div class="stat-note">Average recorded sale</div></div>
+        </div>
+
+        <div class="panel"><div class="panel-head"><div><h2>Sales growth</h2><p>How your sales rise and fall over time</p></div><div class="trend-tabs" data-chart="trendRep"><button data-mode="day" class="on">Daily</button><button data-mode="week">Weekly</button><button data-mode="month">Monthly</button></div></div><div class="trend-box" id="trendRep"></div><div class="trend-sum" id="trendRepSum"></div></div>
+        <div class="report-grid">
+          <div class="panel"><div class="panel-head"><div><h2>Payment status</h2><p>Share of recorded receipts</p></div></div><div class="bar-list" id="statusBars"></div></div>
+          <div class="panel"><div class="panel-head"><div><h2>Payment methods</h2><p>Total amount collected by method</p></div></div><div class="bar-list" id="methodBars"></div></div>
+        </div>
+      </section>
+
+      <section id="receiptPage" class="hidden">
+        <div class="page-head no-print"><div><h1>Receipt preview</h1><p>Review your receipt before printing.</p></div><div style="display:flex;gap:8px"><button class="btn" onclick="showPage('history')">Back</button><button class="btn btn-primary" onclick="printCurrent()">Print / Save PDF</button></div></div>
+        <div id="printReceipt" class="receipt-paper"></div>
+      </section>
+      <footer>MAUNGU'S COUTURE AND TRADE</footer>
+    </div>
+  </main>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Maungu Receipt Manager — Supabase Auth connection
+const SUPABASE_URL = 'https://dxutperypxhfqpgltzxu.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_XWjDwgLDvtsYvUT8PqPLEw_ALf7WW61';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const KEY='maungu_receipt_manager_v1';
+let sales=[];
+let currentReceipt=null;
+let currentBusinessId=null;
+let toastTimer;
+const $=id=>document.getElementById(id);
+const money=n=>'GH₵'+Number(n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function loadSales(){
+  try {const data=JSON.parse(localStorage.getItem(KEY)||'[]');sales=Array.isArray(data)?data:[];}
+  catch(e){sales=[];notify('Saved browser data could not be read.');}
+}
+function persist(){
+  try {localStorage.setItem(KEY,JSON.stringify(sales));return true;}
+  catch(e){notify('Browser storage failed.');return false;}
+}
+function normalizeSale(row,items=[]){
+  const subtotal=Number(row.subtotal)||0, delivery=Number(row.delivery_fee)||0, discount=Number(row.discount)||0;
+  const total=Number(row.total)||0, paid=Number(row.amount_paid)||0;
+  return {id:row.id,receiptNumber:row.receipt_number,date:row.sale_date||row.created_at||new Date().toISOString(),
+    customerName:row.customer_name||'',customerPhone:row.customer_phone||'',customerAddress:row.customer_address||'',
+    items:items.map(i=>({id:i.id,name:i.product_name,quantity:Number(i.quantity)||0,unitPrice:Number(i.unit_price)||0,lineTotal:Number(i.line_total)||Number(i.quantity)*Number(i.unit_price)||0,color:safeColor(i.item_color),colorName:colorNameOf(safeColor(i.item_color))})),
+    subtotal,delivery,discount,total,paid,balance:Math.max(0,total-paid),paymentMethod:row.payment_method||'',
+    paymentStatus:row.payment_status||'',notes:row.notes||''};
+}
+async function getBusinessId(){
+  if(currentBusinessId)return currentBusinessId;
+  if(!currentAuthUser)throw new Error('Please sign in again.');
+  const {data,error}=await supabaseClient.from('maungu_businesses').select('id').eq('owner_id',currentAuthUser.id).limit(1).maybeSingle();
+  if(error)throw error;
+  if(!data)throw new Error('No Maungu business is linked to this account. Check the owner setup in Supabase.');
+  currentBusinessId=data.id;return currentBusinessId;
+}
+async function loadCloudSales(){
+  const businessId=await getBusinessId();
+  const {data:rows,error}=await supabaseClient.from('maungu_sales').select('*').eq('business_id',businessId).order('created_at',{ascending:false});
+  if(error)throw error;
+  const ids=(rows||[]).map(r=>r.id);
+  let itemRows=[];
+  if(ids.length){const result=await supabaseClient.from('maungu_sale_items').select('*').in('sale_id',ids);if(result.error)throw result.error;itemRows=result.data||[];}
+  sales=(rows||[]).map(r=>normalizeSale(r,itemRows.filter(i=>i.sale_id===r.id)));
+  persist();
+}
+async function saveSaleToCloud(sale){
+  const businessId=await getBusinessId();
+  const row={business_id:businessId,receipt_number:sale.receiptNumber,sale_date:sale.date,
+    customer_name:sale.customerName,customer_phone:sale.customerPhone,customer_address:sale.customerAddress,
+    subtotal:sale.subtotal,delivery_fee:sale.delivery,discount:sale.discount,total:sale.total,
+    amount_paid:sale.paid,payment_method:sale.paymentMethod,payment_status:paymentStatus(sale),
+    notes:sale.notes,created_by:currentAuthUser.id};
+  const {data,error}=await supabaseClient.from('maungu_sales').insert(row).select('*').single();
+  if(error)throw error;
+  const itemRows=sale.items.map(i=>({sale_id:data.id,product_name:i.name,quantity:i.quantity,unit_price:i.unitPrice,line_total:i.lineTotal,item_color:i.color}));
+  let result=await supabaseClient.from('maungu_sale_items').insert(itemRows);
+  if(result.error&&/item_color/i.test(result.error.message||'')){
+    // item_color column not created in Supabase yet: save without it so the receipt still saves
+    result=await supabaseClient.from('maungu_sale_items').insert(itemRows.map(({item_color,...rest})=>rest));
+    if(!result.error)notify('Saved, but add the item_color column in Supabase to keep item colours after reload.');
+  }
+  if(result.error){await supabaseClient.from('maungu_sales').delete().eq('id',data.id);throw result.error;}
+  sale.id=data.id;
+}
+async function deleteSaleFromCloud(id){
+  const itemResult=await supabaseClient.from('maungu_sale_items').delete().eq('sale_id',id);
+  if(itemResult.error)throw itemResult.error;
+  const saleResult=await supabaseClient.from('maungu_sales').delete().eq('id',id);
+  if(saleResult.error)throw saleResult.error;
+}
+function notify(message){
+  $('toast').textContent=message;$('toast').classList.remove('hidden');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),3200);
+}
+function showPage(page){
+  if(page!=='login'&&!isAuthenticated())page='login';
+  document.querySelectorAll('[id$="Page"]').forEach(el=>el.classList.add('hidden'));
+  const app=document.querySelector('.app');
+  if(page==='login'){
+    $('loginPage').classList.remove('hidden');
+    if(app)app.style.display='none';
+    return;
+  }
+  $(page+'Page').classList.remove('hidden');
+  if(app)app.style.display='grid';
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  const names={dashboard:['OVERVIEW','Business overview'],new:['NEW RECEIPT','Create receipt'],history:['TRANSACTIONS','Transaction history'],reports:['REPORTS','Sales reports'],receipt:['RECEIPT','Receipt preview']};
+  $('crumb').textContent=names[page][0];$('topTitle').textContent=names[page][1];
+  if(page==='dashboard')renderDashboard();
+  if(page==='history')renderHistory();
+  if(page==='reports')renderReports();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+const ITEM_COLORS=[['Orange','#F85C05'],['Black','#17110B'],['Blue','#1D4ED8'],['Navy','#1E3A8A'],['Sky blue','#0284C7'],['Teal','#0F766E'],['Green','#15803D'],['Red','#DC2626'],['Maroon','#9F1239'],['Pink','#DB2777'],['Purple','#7E22CE'],['Brown','#92400E'],['Gold','#B45309'],['Grey','#6B7280']];
+function colorNameOf(h){const m=ITEM_COLORS.find(([n,x])=>x.toLowerCase()===String(h||'').toLowerCase());return m?m[0]:'';}
+function safeColor(c){return /^#[0-9a-fA-F]{6}$/.test(c||'')?c:'#F85C05';}
+function addItem(name='',qty=1,price='',color='#F85C05'){
+  const row=document.createElement('div');row.className='item-row';
+  row.innerHTML=`<input class="item-name" placeholder="Shirt, jeans…" aria-label="Item name" value="${escapeHTML(name)}"><div class="color-wrap"><span class="swatch"></span><select class="item-color" aria-label="Item colour">${ITEM_COLORS.map(([n,h])=>`<option value="${h}" ${h.toLowerCase()===color.toLowerCase()?'selected':''}>${n}</option>`).join('')}</select></div><input class="item-qty" type="number" min="1" step="1" value="${qty}" aria-label="Quantity"><input class="item-price" type="number" min="0" step=".01" placeholder="0.00" value="${price}" aria-label="Unit price"><span class="line-total">GH₵0.00</span><button type="button" class="remove" title="Remove item" aria-label="Remove item">×</button>`;
+  const nameInput=row.querySelector('.item-name'),colorSel=row.querySelector('.item-color');
+  const swatch=row.querySelector('.swatch');
+  const applyColor=()=>{swatch.style.background=colorSel.value;};
+  colorSel.addEventListener('change',applyColor);applyColor();
+  row.querySelectorAll('input').forEach(el=>el.addEventListener('input',calculate));
+  row.querySelector('.remove').addEventListener('click',()=>{row.remove();if(!$('items').children.length)addItem();calculate();});$('items').appendChild(row);calculate();
+}
+function itemData(){
+  return [...$('items').querySelectorAll('.item-row')].map(row=>{
+    const name=row.querySelector('.item-name').value.trim();
+    const quantity=Number(row.querySelector('.item-qty').value);
+    const unitPrice=Number(row.querySelector('.item-price').value);
+    const colorSel=row.querySelector('.item-color');
+    const color=safeColor(colorSel.value);
+    const colorName=colorSel.options[colorSel.selectedIndex]?.text||'';
+    return {name,quantity,unitPrice,lineTotal:Math.round(quantity*unitPrice*100)/100,color,colorName};
+  }).filter(i=>i.name&&i.quantity>0&&i.unitPrice>=0);
+}
+function calcTotals(items=itemData()){
+  const subtotal=Math.round(items.reduce((sum,i)=>sum+i.lineTotal,0)*100)/100;
+  const delivery=Math.max(0,Number($('delivery').value)||0);
+  const discount=Math.max(0,Number($('discount').value)||0);
+  const total=Math.max(0,Math.round((subtotal+delivery-discount)*100)/100);
+  const paid=Math.max(0,Number($('amountPaid').value)||0);
+  return {subtotal,delivery,discount,total,paid,balance:Math.max(0,Math.round((total-paid)*100)/100)};
+}
+function calculate(){
+  $('items').querySelectorAll('.item-row').forEach(row=>{
+    const qty=Math.max(0,Number(row.querySelector('.item-qty').value)||0);
+    const price=Math.max(0,Number(row.querySelector('.item-price').value)||0);
+    row.querySelector('.line-total').textContent=money(qty*price);
+  });
+  const t=calcTotals();
+  $('subtotalView').textContent=money(t.subtotal);$('deliveryView').textContent=money(t.delivery);$('discountView').textContent='− '+money(t.discount);$('totalView').textContent=money(t.total);$('balanceView').textContent=money(t.balance);
+}
+['delivery','discount','amountPaid'].forEach(id=>$(id).addEventListener('input',calculate));
+function resetForm(){
+  $('saleForm').reset();$('items').innerHTML='';addItem();calculate();
+}
+function paymentStatus(sale){
+  if(sale.paymentStatus)return sale.paymentStatus;
+  if(sale.paid>=sale.total)return 'Paid';
+  if(sale.paid>0)return 'Partially Paid';
+  return 'Unpaid';
+}
+function makeReceiptNumber(){
+  const now=new Date();
+  const date=now.getFullYear().toString().slice(-2)+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+  let number;
+  do {number='MNG-'+date+'-'+Math.random().toString(36).slice(2,7).toUpperCase();}
+  while(sales.some(s=>s.receiptNumber===number));
+  return number;
+}
+$('saleForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const items=itemData();
+  if(!items.length){notify('Add at least one valid item with a name, quantity and price.');return;}
+  const totals=calcTotals(items);
+  const chosen=document.querySelector('input[name="payStatus"]:checked');
+  if(!chosen){notify('Click a payment status: Paid, Partially Paid or Unpaid.');return;}
+  if(totals.discount>totals.subtotal+totals.delivery){notify('Discount cannot exceed the subtotal plus delivery.');return;}
+  if(totals.paid>totals.total){notify('Amount received cannot exceed the total due in this version.');return;}
+  const sale={
+    id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),
+    receiptNumber:makeReceiptNumber(),date:new Date().toISOString(),
+    customerName:$('customerName').value.trim(),
+    customerPhone:$('customerPhone').value.trim(),
+    customerAddress:$('customerAddress').value.trim(),
+    items,subtotal:totals.subtotal,delivery:totals.delivery,discount:totals.discount,
+    total:totals.total,paid:totals.paid,balance:totals.balance,
+    paymentMethod:$('paymentMethod').value,paymentStatus:chosen.value,
+    notes:$('notes').value.trim()
+  };
+  if(!sale.customerName){notify('Enter the customer name.');return;}
+  const submitButton=$('saleForm').querySelector('button[type="submit"]');
+  if(submitButton)submitButton.disabled=true;
+  try {
+    await saveSaleToCloud(sale);
+    sales.unshift(sale);persist();
+    currentReceipt=sale;renderDashboard();renderHistory();renderReceipt(sale);resetForm();showPage('receipt');
+    notify('Receipt saved to Supabase successfully.');
+  } catch(error) {
+    console.error('Could not save receipt to Supabase:',error);
+    notify('Receipt was not saved online: '+(error.message||'Check your connection and Supabase policies.'));
+  } finally {if(submitButton)submitButton.disabled=false;}
+});
+function dateText(iso){return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function statusClass(status){return status==='Paid'?'paid':status==='Unpaid'?'unpaid':'partial';}
+function statusPill(status){return `<span class="pill ${statusClass(status)}">${escapeHTML(status)}</span>`;}
+function actionButtons(s){
+  return `<button class="link-btn" onclick="openReceipt('${s.id}')">View / Print</button><button class="link-btn delete-btn" onclick="deleteSale('${escapeHTML(s.id)}','${escapeHTML(s.receiptNumber)}')" title="Delete">🗑️</button>`;
+}
+async function deleteSale(id,receiptNumber){
+  if(!confirm('Delete receipt '+escapeHTML(receiptNumber)+'? This cannot be undone.'))return;
+  const idx=sales.findIndex(x=>x.id===id);
+  if(idx===-1)return notify('Receipt not found.');
+  try {
+    await deleteSaleFromCloud(id);
+    sales.splice(idx,1);persist();
+    if(currentReceipt&&currentReceipt.id===id){currentReceipt=null;showPage('dashboard');}
+    renderDashboard();renderHistory();renderReports();notify('Receipt deleted from Supabase.');
+  } catch(error){console.error('Delete failed:',error);notify('Could not delete online: '+(error.message||'check Supabase delete policies.'));}
+}
+
+const trendMode={trendDash:'day',trendRep:'day'};
+function trendBuckets(mode){
+  const now=new Date(),out=[];
+  const key=d=>d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+  if(mode==='day'){for(let i=29;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);out.push({k:key(d),label:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),v:0});}}
+  else if(mode==='week'){for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i*7);const st=new Date(d);st.setDate(d.getDate()-((d.getDay()+6)%7));out.push({k:'w'+key(st),st,label:'Wk '+st.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),v:0});}}
+  else{for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);out.push({k:d.getFullYear()+'-'+d.getMonth(),label:d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'}),v:0});}}
+  const map=Object.fromEntries(out.map(b=>[b.k,b]));
+  sales.forEach(s=>{
+    const d=new Date(s.date);let k;
+    if(mode==='day')k=key(d);
+    else if(mode==='week'){const st=new Date(d.getFullYear(),d.getMonth(),d.getDate());st.setDate(st.getDate()-((st.getDay()+6)%7));k='w'+key(st);}
+    else k=d.getFullYear()+'-'+d.getMonth();
+    if(map[k])map[k].v+=Number(s.total)||0;
+  });
+  return out;
+}
+function smoothPath(pts){
+  if(pts.length<2)return '';
+  let d=`M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    const c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+    d+=` C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+function renderTrend(id){
+  const box=$(id);if(!box)return;
+  const data=trendBuckets(trendMode[id]);
+  const W=720,H=260,L=56,R=14,T=14,B=34,iw=W-L-R,ih=H-T-B;
+  const max=Math.max(1,...data.map(b=>b.v)),nice=Math.pow(10,Math.floor(Math.log10(max)));
+  const yMax=Math.ceil(max*1.1/nice)*nice;
+  const x=i=>L+(data.length>1?i/(data.length-1)*iw:iw/2),y=v=>T+ih-(v/yMax)*ih;
+  const pts=data.map((b,i)=>[x(i),y(b.v)]);
+  const line=smoothPath(pts),area=line+` L${pts[pts.length-1][0]},${T+ih} L${pts[0][0]},${T+ih} Z`;
+  let grid='';
+  for(let g=0;g<=4;g++){const v=yMax*g/4,yy=y(v);grid+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#E8E3DC" stroke-dasharray="${g?'3 4':'0'}"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="10" fill="#8A847D">${v>=1000?(v/1000).toFixed(v>=10000?0:1)+'k':Math.round(v)}</text>`;}
+  const step=Math.ceil(data.length/6);
+  const xl=data.map((b,i)=>i%step===0||i===data.length-1?`<text x="${x(i)}" y="${H-10}" text-anchor="middle" font-size="10" fill="#8A847D">${b.label}</text>`:'').join('');
+  const dots=data.map((b,i)=>`<circle cx="${pts[i][0]}" cy="${pts[i][1]}" r="${b.v>0?3.5:0}" fill="#fff" stroke="#F85C05" stroke-width="2"/>`).join('');
+  box.innerHTML=`<svg class="trend-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales trend"><defs><linearGradient id="${id}G" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F85C05" stop-opacity=".28"/><stop offset="1" stop-color="#F85C05" stop-opacity="0"/></linearGradient></defs>${grid}${xl}<path d="${area}" fill="url(#${id}G)"/><path d="${line}" fill="none" stroke="#F85C05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>${dots}<line class="hv" y1="${T}" y2="${T+ih}" stroke="#17110B33" opacity="0"/><rect class="hit" x="${L}" y="${T}" width="${iw}" height="${ih}" fill="transparent"/></svg><div class="trend-tip"></div>`;
+  const svg=box.querySelector('svg'),tip=box.querySelector('.trend-tip'),hv=box.querySelector('.hv'),hit=box.querySelector('.hit');
+  const move=e=>{
+    const r=svg.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,vx=cx/r.width*W;
+    const i=Math.max(0,Math.min(data.length-1,Math.round((vx-L)/iw*(data.length-1))));
+    hv.setAttribute('x1',pts[i][0]);hv.setAttribute('x2',pts[i][0]);hv.setAttribute('opacity',1);
+    tip.innerHTML=`${data[i].label}<br><strong>${money(data[i].v)}</strong>`;
+    tip.style.left=(pts[i][0]/W*r.width)+'px';tip.style.top=(pts[i][1]/H*r.height)+'px';tip.style.opacity=1;
+  };
+  hit.addEventListener('mousemove',move);hit.addEventListener('touchstart',move,{passive:true});hit.addEventListener('touchmove',move,{passive:true});
+  hit.addEventListener('mouseleave',()=>{tip.style.opacity=0;hv.setAttribute('opacity',0);});
+  const half=Math.floor(data.length/2),a=data.slice(0,half).reduce((n,b)=>n+b.v,0),b2=data.slice(half).reduce((n,b)=>n+b.v,0),tot=a+b2;
+  const best=data.reduce((m,b)=>b.v>m.v?b:m,data[0]);
+  let change='No earlier sales to compare';
+  if(a>0){const p=(b2-a)/a*100;change=`<span class="${p>=0?'trend-up':'trend-down'}">${p>=0?'▲':'▼'} ${Math.abs(p).toFixed(0)}%</span> vs previous period`;}
+  else if(b2>0)change='<span class="trend-up">▲ New sales this period</span>';
+  $(id+'Sum').innerHTML=`<span>Period total <strong>${money(tot)}</strong></span><span>Best ${trendMode[id]==='day'?'day':trendMode[id]==='week'?'week':'month'} <strong>${best.v>0?best.label+' · '+money(best.v):'—'}</strong></span><span>${change}</span>`;
+}
+document.querySelectorAll('.trend-tabs').forEach(t=>t.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  trendMode[t.dataset.chart]=b.dataset.mode;
+  t.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  renderTrend(t.dataset.chart);
+}));
+
+function renderDashboard(){
+  const total=sales.reduce((n,s)=>n+s.total,0),paid=sales.reduce((n,s)=>n+s.paid,0),balance=sales.reduce((n,s)=>n+s.balance,0);
+  $('statSales').textContent=money(total);$('statPaid').textContent=money(paid);$('statBalance').textContent=money(balance);$('statCount').textContent=sales.length;
+  $('recentRows').innerHTML=sales.slice(0,5).map(s=>`<tr><td><div class="customer">${escapeHTML(s.receiptNumber)}</div><div class="subtext">${escapeHTML(s.customerName)}</div></td><td>${dateText(s.date)}</td><td><strong>${money(s.total)}</strong></td><td>${escapeHTML(s.paymentMethod)}</td><td>${statusPill(paymentStatus(s))}</td><td>${actionButtons(s)}</td></tr>`).join('');
+  $('recentEmpty').classList.toggle('hidden',sales.length>0);
+  renderTrend('trendDash');
+}
+function renderHistory(){
+  const q=$('searchInput').value.toLowerCase().trim(),filter=$('statusFilter').value;
+  const list=sales.filter(s=>(!q||[s.receiptNumber,s.customerName,s.customerPhone].join(' ').toLowerCase().includes(q))&&(!filter||paymentStatus(s)===filter));
+  $('historyRows').innerHTML=list.map(s=>`<tr><td><div class="customer">${escapeHTML(s.receiptNumber)}</div><div class="subtext">${escapeHTML(s.customerName)} · ${escapeHTML(s.customerPhone||'No phone')}</div></td><td>${dateText(s.date)}</td><td>${money(s.total)}</td><td>${money(s.paid)}</td><td>${money(s.balance)}</td><td>${statusPill(paymentStatus(s))}</td><td>${actionButtons(s)}</td></tr>`).join('');
+  $('historyEmpty').classList.toggle('hidden',list.length>0);
+}
+$('searchInput').addEventListener('input',renderHistory);$('statusFilter').addEventListener('change',renderHistory);
+function renderReports(){
+  renderTrend('trendRep');
+  const total=sales.reduce((n,s)=>n+s.total,0),paid=sales.reduce((n,s)=>n+s.paid,0),balance=sales.reduce((n,s)=>n+s.balance,0);
+  $('reportSales').textContent=money(total);$('reportPaid').textContent=money(paid);$('reportBalance').textContent=money(balance);$('reportAverage').textContent=money(sales.length?total/sales.length:0);
+  const statuses=['Paid','Partially Paid','Unpaid'];
+  $('statusBars').innerHTML=statuses.map(status=>{
+    const count=sales.filter(s=>paymentStatus(s)===status).length;
+    const pct=sales.length?count/sales.length*100:0;
+    return `<div><div class="bar-label"><span>${status}</span><strong>${count} (${pct.toFixed(0)}%)</strong></div><div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+  const methods=[...new Set(sales.map(s=>s.paymentMethod))];
+  $('methodBars').innerHTML=methods.length?methods.map(method=>{
+    const amount=sales.filter(s=>s.paymentMethod===method).reduce((n,s)=>n+s.paid,0);
+    const max=Math.max(1,...methods.map(m=>sales.filter(s=>s.paymentMethod===m).reduce((n,s)=>n+s.paid,0)));
+    return `<div><div class="bar-label"><span>${escapeHTML(method)}</span><strong>${money(amount)}</strong></div><div class="bar"><div class="bar-fill" style="width:${amount/max*100}%"></div></div></div>`;
+  }).join(''):'<div class="empty">Payment methods will appear after receipts are saved.</div>';
+}
+function renderReceipt(s){
+  const items=s.items.map(i=>`<tr><td><span class="receipt-item">${escapeHTML(i.name)}</span></td><td>${escapeHTML(i.colorName||colorNameOf(i.color))}</td><td>${i.quantity}</td><td>${money(i.unitPrice)}</td><td>${money(i.lineTotal)}</td></tr>`).join('');
+  $('printReceipt').innerHTML=`
+    <div class="receipt-brand"><div class="brand-mark"><img src="assets/logo-mark-clean.png" alt="MAUNGU logo" style="width:100%;height:100%;object-fit:contain;display:block"></div><div><h2>MAUNGU</h2><p>Maungu's Couture and Trade · Men's Fashion · Ghana</p></div></div>
+    <div class="receipt-meta"><div><strong>RECEIPT</strong><br><br><b>${escapeHTML(s.receiptNumber)}</b><br><span style="color:#777">${dateText(s.date)}</span></div>
+    <div style="text-align:right"><strong>CUSTOMER</strong><br><br>${escapeHTML(s.customerName)}<br>${escapeHTML(s.customerPhone||'')}<br>${escapeHTML(s.customerAddress||'')}</div></div>
+    <table><thead><tr><th>Item</th><th>Colour</th><th>Qty</th><th>Unit price</th><th>Amount</th></tr></thead><tbody>${items}</tbody></table>
+    <div class="receipt-total">
+      <div class="total-line"><span>Subtotal</span><strong>${money(s.subtotal)}</strong></div>
+      <div class="total-line"><span>Delivery</span><strong>${money(s.delivery)}</strong></div>
+      <div class="total-line"><span>Discount</span><strong>− ${money(s.discount)}</strong></div>
+      <div class="total-line grand"><span>Total</span><strong>${money(s.total)}</strong></div>
+      <div class="total-line"><span>Amount received</span><strong>${money(s.paid)}</strong></div>
+      <div class="total-line"><span>Balance</span><strong>${money(s.balance)}</strong></div>
+    </div>
+    <div style="margin-top:20px;font-size:12px;line-height:1.8"><strong>Payment method:</strong> ${escapeHTML(s.paymentMethod)}<br><strong>Payment status:</strong> <b style="color:${paymentStatus(s)==='Paid'?'#13734D':paymentStatus(s)==='Unpaid'?'#AE3232':'#986500'}">${escapeHTML(paymentStatus(s))}</b>${s.notes?'<br><strong>Notes:</strong> '+escapeHTML(s.notes):''}</div>
+    <div class="receipt-thanks"><strong>Thank you for shopping with Maungu.</strong><br>Style that speaks for you.</div>`;
+}
+function openReceipt(id){
+  const s=sales.find(x=>x.id===id);if(!s)return notify('Receipt not found.');
+  currentReceipt=s;renderReceipt(s);showPage('receipt');
+}
+function printCurrent(){
+  if(!currentReceipt)return;
+  document.body.classList.add('printing');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('printing'),700);
+}
+window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));
+function downloadFile(filename,content,type){
+  const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+}
+function exportCSV(){
+  const header=['Receipt Number','Date','Customer','Phone','Delivery address','Subtotal','Delivery','Discount','Total','Paid','Balance','Payment method','Payment status','Items'];
+  const rows=[header];
+  sales.forEach(s=>rows.push([
+    s.receiptNumber,dateText(s.date),s.customerName,s.customerPhone,s.customerAddress||'',s.subtotal,
+    s.delivery,s.discount,s.total,s.paid,s.balance,s.paymentMethod,
+    paymentStatus(s),(s.items||[]).map(i=>`${i.name} x${i.quantity}`).join('; ')
+  ]));
+  const csv=rows.map(row=>row.map(value=>{
+    const v=String(value??'');
+    return `"${v.replace(/"/g,'""')}"`;
+  }).join(',')).join('\r\n');
+  downloadFile('maungu-receipts-customer-report.csv','\ufeff'+csv,'text/csv;charset=utf-8;');
+}
+function exportJSON(){
+  downloadFile('maungu-receipts-backup.json',JSON.stringify(sales,null,2),'application/json');
+}
+const USER_KEY='maungu_user';
+let currentAuthUser = null;
+function isAuthenticated(){return !!currentAuthUser;}
+function isAdmin(){return false;}
+function togglePassword(btn){
+  const input=btn.previousElementSibling;
+  const show=input.type==='password';
+  input.type=show?'text':'password';
+  btn.textContent=show?'Hide':'Show';
+}
+async function login(email,password){
+  if(!email||!password){notify('Please enter your email and password.');return false;}
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){notify(error.message==='Invalid login credentials'?'Incorrect email or password.':error.message);return false;}
+  currentAuthUser=data.user;
+  localStorage.setItem(USER_KEY,data.user.email||email);
+  $('userLabel').textContent=data.user.email||email;
+  notify('Signed in successfully.');
+  return true;
+}
+async function logout(){
+  const {error}=await supabaseClient.auth.signOut();
+  if(error){notify('Could not sign out: '+error.message);return;}
+  currentAuthUser=null;currentBusinessId=null;sales=[];
+  localStorage.removeItem(USER_KEY);
+  $('userLabel').textContent='Business workspace';
+  showPage('login');
+}
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const email=$('loginEmail').value.trim();
+  const password=$('loginPassword').value;
+  const submitButton=$('loginForm').querySelector('button[type="submit"]');
+  submitButton.disabled=true;
+  try {if(await login(email,password)){currentBusinessId=null;await loadCloudSales();renderDashboard();renderHistory();renderReports();showPage('dashboard');}}
+  catch(error){notify('Signed in, but could not load online receipts: '+(error.message||'check Supabase policies.'));console.error(error);}
+  finally {submitButton.disabled=false;}
+});
+async function startApp(){
+  loadSales();
+  addItem();
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error)console.error('Supabase session check failed:',error.message);
+  currentAuthUser=data?.session?.user||null;
+  const user=currentAuthUser?.email||localStorage.getItem(USER_KEY);
+  if(currentAuthUser){
+    localStorage.setItem(USER_KEY,user||'');$('userLabel').textContent=user||'Business workspace';
+    try {await loadCloudSales();renderDashboard();renderHistory();renderReports();showPage('dashboard');}
+    catch(loadError){console.error('Could not load cloud receipts:',loadError);notify('Could not load online receipts: '+(loadError.message||'check Supabase policies.'));showPage('dashboard');}
+  }else{
+    localStorage.removeItem(USER_KEY);showPage('login');
+  }
+}
+$('signOutBtn').addEventListener('click',logout);
+startApp();
+
+</script>
+</body>
+</html>
